@@ -3,9 +3,12 @@ import logging
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from elasticsearch import AsyncElasticsearch
 
 from core import config
 from core.logger import LOGGING
+from db import elastic
+
 
 app = FastAPI(
     title=config.PROJECT_NAME,
@@ -17,12 +20,14 @@ app = FastAPI(
 
 @app.on_event("startup")
 async def startup():
-    pass
+    elastic.es = AsyncElasticsearch(
+        hosts=[f'{config.ELASTIC_HOST}:{config.ELASTIC_PORT}']
+    )
 
 
 @app.on_event("shutdown")
 async def shutdown():
-    pass
+    await elastic.es.close()
 
 
 if __name__ == "__main__":
@@ -32,4 +37,5 @@ if __name__ == "__main__":
         port=8000,
         log_config=LOGGING,
         log_level=logging.DEBUG,
+        reload=True,
     )
