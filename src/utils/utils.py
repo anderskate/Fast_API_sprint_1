@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import parse_obj_as
 from pydantic.main import ModelMetaclass
 
-from models.movie import ALLOWED_SORT_FIELDS
+from models.movie import ALLOWED_SORT_FIELDS, FIELDS_FOR_SEARCH
 
 
 def get_movies_sorting_for_elastic(sort_field: Optional[str] = None) -> dict:
@@ -32,10 +32,10 @@ def get_genres_filter_for_elastic(genres: Optional[List[str]] = None) -> dict:
 
 
 def get_search_body_for_movies(
-        query: str, fields_for_search: Optional[List[str]] = None
+    query: str, fields_for_search: Optional[List[str]] = None
 ) -> dict:
     if fields_for_search is None:
-        fields_for_search = ["title", "actors_names"]
+        fields_for_search = FIELDS_FOR_SEARCH
     return {"query": {"multi_match": {"query": query, "fields": fields_for_search}}}
 
 

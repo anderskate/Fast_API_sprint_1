@@ -7,9 +7,12 @@ from fastapi import Depends
 from db.elastic import get_elastic
 from db.redis import get_redis
 from models.movie import Movie
-from utils.utils import (get_genres_filter_for_elastic,
-                         get_movies_sorting_for_elastic,
-                         get_search_body_for_movies, parse_objects)
+from utils.utils import (
+    get_genres_filter_for_elastic,
+    get_movies_sorting_for_elastic,
+    get_search_body_for_movies,
+    parse_objects,
+)
 
 
 class MovieService:
