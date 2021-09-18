@@ -4,10 +4,10 @@ from aioredis import Redis
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 
-from db.elastic import get_elastic
-from db.redis import get_redis
-from models.movie import Movie
-from utils.utils import (
+from src.db.elastic import get_elastic
+from src.db.redis import get_redis
+from src.models.movie import Movie
+from src.utils.utils import (
     get_genres_filter_for_elastic,
     get_movies_sorting_for_elastic,
     get_search_body_for_movies,

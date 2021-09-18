@@ -5,8 +5,8 @@ from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 from pydantic import BaseModel
 
-from db.elastic import get_elastic
-from models.person import Person
+from src.db.elastic import get_elastic
+from src.models.person import Person
 
 
 class PersonMovie(BaseModel):

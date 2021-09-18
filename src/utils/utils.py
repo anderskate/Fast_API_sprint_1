@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import parse_obj_as
 from pydantic.main import ModelMetaclass
 
-from models.movie import ALLOWED_SORT_FIELDS, FIELDS_FOR_SEARCH
+from src.models.movie import ALLOWED_SORT_FIELDS, FIELDS_FOR_SEARCH
 
 
 def get_movies_sorting_for_elastic(sort_field: Optional[str] = None) -> dict:
