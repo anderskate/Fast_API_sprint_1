@@ -1,12 +1,11 @@
 import orjson
-from uuid import UUID
 
 from pydantic import BaseModel
 
 
 class Genre(BaseModel):
     """Model to represent Genre objects."""
-    id: UUID
+    id: str
     name: str
 
     class Config:

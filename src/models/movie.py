@@ -1,5 +1,4 @@
 import orjson
-from uuid import UUID
 from typing import List
 
 from pydantic import BaseModel
