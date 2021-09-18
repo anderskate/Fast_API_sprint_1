@@ -1,51 +1,65 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from aioredis import Redis
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 
-from src.db.elastic import get_elastic
-from src.db.redis import get_redis
-from src.models.movie import Movie
-from src.utils.utils import (get_sort_for_elastic,
-                             get_genres_filter_for_elastic,
-                             get_search_body_for_movies,
-                             parse_objects)
+from db.elastic import get_elastic
+from db.redis import get_redis
+from models.movie import Movie
+from utils.utils import (get_genres_filter_for_elastic,
+                         get_movies_sorting_for_elastic,
+                         get_search_body_for_movies, parse_objects)
 
 
 class MovieService:
+    """Service for getting data for movie."""
+
     def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
         self.redis = redis
         self.elastic = elastic
 
     async def get_by_id(self, movie_id: str) -> Optional[Movie]:
+        """Get movie data by id."""
         return await self._get_movie_from_elastic(movie_id)
 
     async def get_all(self, sort: Optional[str], genres: Optional[str]):
+        """Get all movies data with optional filters."""
         return await self._get_movies_from_elastic(sort, genres)
 
-    async def _get_movies_from_elastic(self, sort: Optional[str], genres: Optional[List[str]]):
+    async def _get_movies_from_elastic(
+        self, sort: Optional[str], genres: Optional[List[str]]
+    ):
+        """Get movies from ElasticSearch with optional filters."""
         body = {}
-        body.update(get_sort_for_elastic(sort))
+        body.update(get_movies_sorting_for_elastic(sort))
         body.update(get_genres_filter_for_elastic(genres))
-        res = await self.elastic.search(index='movies', body=body)
+        res = await self.elastic.search(index="movies", body=body)
         return parse_objects(res, Movie)
 
     async def search_movies(self, query):
+        """Find movies by specific query."""
         movies = await self._search_movie_in_elastic(query)
         return movies
 
     async def _search_movie_in_elastic(self, query: str) -> List[Optional[Movie]]:
-        res = await self.elastic.search(index='movies', body=get_search_body_for_movies(query))
+        """Search movies in ElasticSearch by specific query."""
+        res = await self.elastic.search(
+            index="movies", body=get_search_body_for_movies(query)
+        )
         return parse_objects(res, Movie)
 
     async def _get_movie_from_elastic(self, movie_id: str) -> Optional[Movie]:
-        doc = await self.elastic.get('movies', movie_id)
-        return Movie(**doc['_source'])
+        """Get movie data from ElasticSearch."""
+        if not await self.elastic.exists("movies", movie_id):
+            return None
+        movie_data = await self.elastic.get("movies", movie_id)
+        return Movie(**movie_data["_source"])
 
 
 def get_movie_service(
-        redis: Redis = Depends(get_redis),
-        elastic: AsyncElasticsearch = Depends(get_elastic)
+    redis: Redis = Depends(get_redis),
+    elastic: AsyncElasticsearch = Depends(get_elastic),
 ) -> MovieService:
+    """Get a service for working with Movie data"""
     return MovieService(redis, elastic)
