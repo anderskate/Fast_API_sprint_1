@@ -1,5 +1,4 @@
 import orjson
-from uuid import UUID
 from typing import List
 
 from pydantic import BaseModel
@@ -10,7 +9,7 @@ from .person import Person
 
 class Movie(BaseModel):
     """Model to represent Movie objects."""
-    id: UUID
+    id: str
     imdb_rating: float
     title: str
     description: str

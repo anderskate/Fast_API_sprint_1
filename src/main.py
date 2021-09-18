@@ -8,6 +8,7 @@ from elasticsearch import AsyncElasticsearch
 from core import config
 from core.logger import LOGGING
 from db import elastic
+from api.v1 import person, genre
 
 
 app = FastAPI(
@@ -28,6 +29,10 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await elastic.es.close()
+
+
+app.include_router(person.router, prefix='/api/v1/persons', tags=['persons'])
+app.include_router(genre.router, prefix='/api/v1/genres', tags=['genres'])
 
 
 if __name__ == "__main__":
