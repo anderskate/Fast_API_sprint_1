@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, add_pagination, paginate
 from fastapi_pagination.bases import AbstractPage
 
-from models.person import Person
-from services.person import PersonMovie, PersonService, get_person_service
+from src.models.person import Person
+from src.services.person import PersonMovie, PersonService, get_person_service
 
 router = APIRouter()
 

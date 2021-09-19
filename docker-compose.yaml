@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+    container_name: backend_container
+    user: web
+    command: python3 start.py
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - elastic
+    ports:
+      - "8000:8000"
+
+  redis:
+    image: redis:6.2.5
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+
+  elastic:
+    image: elasticsearch:7.14.1
+    container_name: elastic_container
+    volumes:
+      - elastic_logs:/usr/share/elasticsearch/logs
+      - elastic_data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+
+volumes:
+  elastic_logs:
+  elastic_data:

@@ -24,5 +24,4 @@ class Movie(BaseModel):
         json_dumps = orjson.dumps
 
 
-ALLOWED_SORT_FIELDS = {"imdb_rating"}
 FIELDS_FOR_SEARCH = ["title", "description", "actors_names", "writers_names"]

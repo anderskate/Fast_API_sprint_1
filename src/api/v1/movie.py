@@ -5,24 +5,22 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi_pagination import Page, add_pagination, paginate
 from fastapi_pagination.bases import AbstractPage
 
-from models.movie import Movie
-from services.movie import MovieService, get_movie_service
+from src.models.movie import Movie
+from src.services.movie import MovieService, get_movie_service
 
 router = APIRouter()
 
 
-@router.get("/", response_model=Page[Movie])
-async def get_movies(
-    sort: Optional[str] = None,
-    genres: Optional[List[str]] = Query(None),
-    movie_service: MovieService = Depends(get_movie_service),
+@router.get("/search/", response_model=Page[Movie])
+async def search_movies(
+    query: str, movie_service: MovieService = Depends(get_movie_service)
 ) -> AbstractPage[Movie]:
-    """Represent all person movies with optional filters."""
-    movies = await movie_service.get_all(sort, genres)
+    """Represent movies founded by specific query."""
+    movies = await movie_service.search_movies(query)
     return paginate(movies)
 
 
-@router.get("/movie/{movie_id}", response_model=Movie)
+@router.get("/{movie_id}", response_model=Movie)
 async def get_movie_details(
     movie_id: str, movie_service: MovieService = Depends(get_movie_service)
 ) -> Movie:
@@ -33,12 +31,14 @@ async def get_movie_details(
     return movie
 
 
-@router.get("/search", response_model=Page[Movie])
-async def search_movies(
-    query: str = None, movie_service: MovieService = Depends(get_movie_service)
+@router.get("", response_model=Page[Movie])
+async def get_movies(
+    sort: Optional[str] = Query("imdb_rating", regex="-?imdb_rating$"),
+    genres: Optional[List[str]] = Query(None),
+    movie_service: MovieService = Depends(get_movie_service),
 ) -> AbstractPage[Movie]:
-    """Represent movies founded by specific query."""
-    movies = await movie_service.search_movies(query)
+    """Represent all movies with optional filters."""
+    movies = await movie_service.get_all(sort, genres)
     return paginate(movies)
 
 

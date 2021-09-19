@@ -4,15 +4,12 @@ from aioredis import Redis
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 
-from db.elastic import get_elastic
-from db.redis import get_redis
-from models.movie import Movie
-from utils.utils import (
-    get_genres_filter_for_elastic,
-    get_movies_sorting_for_elastic,
-    get_search_body_for_movies,
-    parse_objects,
-)
+from src.db.elastic import get_elastic
+from src.db.redis import get_redis
+from src.models.movie import Movie
+from src.utils.utils import (get_genres_filter_for_elastic,
+                             get_movies_sorting_for_elastic,
+                             get_search_body_for_movies, parse_objects)
 
 
 class MovieService:
@@ -35,8 +32,10 @@ class MovieService:
     ):
         """Get movies from ElasticSearch with optional filters."""
         body = {}
-        body.update(get_movies_sorting_for_elastic(sort))
-        body.update(get_genres_filter_for_elastic(genres))
+        if sort:
+            body.update(get_movies_sorting_for_elastic(sort))
+        if genres:
+            body.update(get_genres_filter_for_elastic(genres))
         res = await self.elastic.search(index="movies", body=body)
         return parse_objects(res, Movie)
 
