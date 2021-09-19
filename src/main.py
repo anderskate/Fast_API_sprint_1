@@ -1,15 +1,14 @@
 import logging
 
 import uvicorn
+from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
-from elasticsearch import AsyncElasticsearch
 
+from api.base_router import api_router
 from core import config
 from core.logger import LOGGING
 from db import elastic
-from api.v1 import person, genre
-
 
 app = FastAPI(
     title=config.PROJECT_NAME,
@@ -18,21 +17,19 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
 )
 
+app.router.include_router(api_router, prefix="/api/v1")
+
 
 @app.on_event("startup")
 async def startup():
     elastic.es = AsyncElasticsearch(
-        hosts=[f'{config.ELASTIC_HOST}:{config.ELASTIC_PORT}']
+        hosts=[f"{config.ELASTIC_HOST}:{config.ELASTIC_PORT}"]
     )
 
 
 @app.on_event("shutdown")
 async def shutdown():
     await elastic.es.close()
-
-
-app.include_router(person.router, prefix='/api/v1/persons', tags=['persons'])
-app.include_router(genre.router, prefix='/api/v1/genres', tags=['genres'])
 
 
 if __name__ == "__main__":
