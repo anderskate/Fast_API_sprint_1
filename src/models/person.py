@@ -1,7 +1,6 @@
 from datetime import date
 from typing import List, Optional
 
-import orjson
 from pydantic import BaseModel
 
 
@@ -19,7 +18,3 @@ class Person(BaseModel):
     full_name: str
     birth_date: Optional[date]
     related_movies: Optional[List[RelatedPersonMovie]]
-
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson.dumps

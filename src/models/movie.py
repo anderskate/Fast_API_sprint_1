@@ -1,6 +1,5 @@
 from typing import List
 
-import orjson
 from pydantic import BaseModel
 
 from .genre import Genre
@@ -18,10 +17,6 @@ class Movie(BaseModel):
     actors: List[Person]
     writers: List[Person]
     directors: List[Person]
-
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson.dumps
 
 
 ALLOWED_SORT_FIELDS = {"imdb_rating"}

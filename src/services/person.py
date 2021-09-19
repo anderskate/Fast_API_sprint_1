@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from db.elastic import get_elastic
 from models.person import Person
+from .cache import CacheService, get_cache_service
 
 
 class PersonMovie(BaseModel):
@@ -20,12 +21,18 @@ class PersonMovie(BaseModel):
 class PersonService:
     """Service for getting data by Person."""
 
-    def __init__(self, elastic: AsyncElasticsearch):
+    def __init__(self, elastic: AsyncElasticsearch, cache_service: CacheService):
         self.elastic = elastic
+        self.cache_service = cache_service
 
     async def get_by_id(self, person_id: str) -> Optional[Person]:
         """Get person data by id."""
+        person = await self.cache_service.get_obj_from_cache(person_id, Person)
+        if person:
+            return person
+
         person = await self._get_person_from_elastic(person_id)
+        await self.cache_service.put_obj_to_cache(person)
         return person
 
     async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
@@ -48,7 +55,9 @@ class PersonService:
 
     async def get_person_movies(self, person_id: str) -> Optional[Person]:
         """Get all person movies data."""
-        person = await self._get_person_from_elastic(person_id)
+        person = await self.cache_service.get_obj_from_cache(person_id, Person)
+        if not person:
+            person = await self._get_person_from_elastic(person_id)
         if not person:
             return None
         person_movie_ids = [movie.id for movie in person.related_movies]
@@ -73,6 +82,7 @@ class PersonService:
 
 def get_person_service(
     elastic: AsyncElasticsearch = Depends(get_elastic),
+    cache_service: CacheService = Depends(get_cache_service)
 ) -> PersonService:
     """Get a service for working with Person data."""
-    return PersonService(elastic)
+    return PersonService(elastic, cache_service)
