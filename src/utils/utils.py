@@ -1,40 +1,24 @@
-from http import HTTPStatus
 from operator import itemgetter
-from typing import List, Optional
+from typing import List, Optional, Type
 
-from fastapi import HTTPException
 from pydantic import parse_obj_as
-from pydantic.main import ModelMetaclass
 
-from src.models.movie import ALLOWED_SORT_FIELDS, FIELDS_FOR_SEARCH
-
-
-def get_movies_sorting_for_elastic(sort_field: Optional[str] = None) -> dict:
-    res = {}
-    if sort_field:
-        if sort_field[0] == "-":
-            order = "desc"
-            field = sort_field[1:]
-        else:
-            order = "asc"
-            field = sort_field
-        if field in ALLOWED_SORT_FIELDS:
-            res["sort"] = {field: {"order": order}}
-        else:
-            raise HTTPException(
-                status_code=HTTPStatus.BAD_REQUEST, detail="bad request"
-            )
-    return res
+from src.models.movie import FIELDS_FOR_SEARCH, Movie
 
 
-def get_genres_filter_for_elastic(genres: Optional[List[str]] = None) -> dict:
-    res = {}
-    if genres:
-        should = [{"match": {"genres.id": genre} for genre in genres}]
-        res["query"] = {
-            "nested": {"path": "genres", "query": {"bool": {"should": should}}}
+def get_movies_sorting_for_elastic(sort_field: str) -> dict:
+    return {
+        "sort": {
+            "imdb_rating": {"order": "asc" if sort_field == "imdb_rating" else "desc"}
         }
-    return res
+    }
+
+
+def get_genres_filter_for_elastic(genres: List[str]) -> dict:
+    should = [{"match": {"genres.id": genre} for genre in genres}]
+    return {
+        "query": {"nested": {"path": "genres", "query": {"bool": {"should": should}}}}
+    }
 
 
 def get_search_body_for_movies(
@@ -45,7 +29,7 @@ def get_search_body_for_movies(
     return {"query": {"multi_match": {"query": query, "fields": fields_for_search}}}
 
 
-def parse_objects(doc: dict, schema: ModelMetaclass) -> List:
+def parse_objects(doc: dict, schema: Type[Movie]) -> List:
     if doc and doc.get("hits"):
         return parse_obj_as(
             List[schema], list(map(itemgetter("_source"), doc["hits"].get("hits", [])))
