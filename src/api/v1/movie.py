@@ -37,7 +37,7 @@ async def get_movies(
     genres: Optional[List[str]] = Query(None),
     movie_service: MovieService = Depends(get_movie_service),
 ) -> AbstractPage[Movie]:
-    """Represent all person movies with optional filters."""
+    """Represent all movies with optional filters."""
     movies = await movie_service.get_all(sort, genres)
     return paginate(movies)
 
