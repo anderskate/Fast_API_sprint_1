@@ -1,6 +1,8 @@
+from http import HTTPStatus
 from operator import itemgetter
 from typing import List, Optional
 
+from fastapi import HTTPException
 from pydantic import parse_obj_as
 from pydantic.main import ModelMetaclass
 
@@ -18,6 +20,10 @@ def get_movies_sorting_for_elastic(sort_field: Optional[str] = None) -> dict:
             field = sort_field
         if field in ALLOWED_SORT_FIELDS:
             res["sort"] = {field: {"order": order}}
+        else:
+            raise HTTPException(
+                status_code=HTTPStatus.BAD_REQUEST, detail="bad request"
+            )
     return res
 
 
