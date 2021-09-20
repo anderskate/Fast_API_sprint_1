@@ -1,11 +1,9 @@
 from typing import List, Optional
 
-from aioredis import Redis
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
 
 from src.db.elastic import get_elastic
-from src.db.redis import get_redis
 from src.models.movie import Movie
 from src.utils.utils import (get_genres_filter_for_elastic,
                              get_movies_sorting_for_elastic,
@@ -15,8 +13,7 @@ from src.utils.utils import (get_genres_filter_for_elastic,
 class MovieService:
     """Service for getting data for movie."""
 
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        self.redis = redis
+    def __init__(self, elastic: AsyncElasticsearch):
         self.elastic = elastic
 
     async def get_by_id(self, movie_id: str) -> Optional[Movie]:
@@ -44,7 +41,8 @@ class MovieService:
         movies = await self._search_movie_in_elastic(query)
         return movies
 
-    async def _search_movie_in_elastic(self, query: str) -> List[Optional[Movie]]:
+    async def _search_movie_in_elastic(
+            self, query: str) -> List[Optional[Movie]]:
         """Search movies in ElasticSearch by specific query."""
         res = await self.elastic.search(
             index="movies", body=get_search_body_for_movies(query)
@@ -60,8 +58,6 @@ class MovieService:
 
 
 def get_movie_service(
-    redis: Redis = Depends(get_redis),
-    elastic: AsyncElasticsearch = Depends(get_elastic),
-) -> MovieService:
+        elastic: AsyncElasticsearch = Depends(get_elastic)) -> MovieService:
     """Get a service for working with Movie data"""
-    return MovieService(redis, elastic)
+    return MovieService(elastic)

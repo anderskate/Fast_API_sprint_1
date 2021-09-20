@@ -4,6 +4,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_pagination import Page, add_pagination, paginate
 from fastapi_pagination.bases import AbstractPage
+from fastapi_cache.decorator import cache
 
 from src.models.person import Person
 from src.services.person import PersonMovie, PersonService, get_person_service
@@ -12,17 +13,21 @@ router = APIRouter()
 
 
 @router.get("/{person_id}/movies/", response_model=List[PersonMovie])
+@cache(expire=60 * 5)
 async def get_person_movies(
     person_id: str, person_service: PersonService = Depends(get_person_service)
 ) -> List[PersonMovie]:
     """Represent all person movies."""
     person_movies = await person_service.get_person_movies(person_id)
     if person_movies is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="person not found")
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="person not found"
+        )
     return person_movies
 
 
 @router.get("/search/", response_model=Page[Person])
+@cache(expire=60 * 5)
 async def search_persons(
     query: str, person_service: PersonService = Depends(get_person_service)
 ) -> AbstractPage[Person]:
@@ -32,6 +37,7 @@ async def search_persons(
 
 
 @router.get("/{person_id}", response_model=Person)
+@cache(expire=60 * 5)
 async def get_person_details(
     person_id: str, person_service: PersonService = Depends(get_person_service)
 ) -> Person:
@@ -39,7 +45,9 @@ async def get_person_details(
     person = await person_service.get_by_id(person_id)
 
     if not person:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="person not found")
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail="person not found"
+        )
     return person
 
 

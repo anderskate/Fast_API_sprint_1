@@ -28,7 +28,8 @@ class PersonService:
         person = await self._get_person_from_elastic(person_id)
         return person
 
-    async def _get_person_from_elastic(self, person_id: str) -> Optional[Person]:
+    async def _get_person_from_elastic(
+            self, person_id: str) -> Optional[Person]:
         """Get person data from ElasticSearch."""
         if not await self.elastic.exists("persons", person_id):
             return None
@@ -38,7 +39,8 @@ class PersonService:
     async def _get_person_movies_from_elastic(self, movie_ids: List[UUID]):
         """Get all person movies data from ElasticSearch."""
         search_body = {"query": {"ids": {"values": movie_ids}}}
-        person_movies_data = await self.elastic.search(index="movies", body=search_body)
+        person_movies_data = await self.elastic.search(
+            index="movies", body=search_body)
 
         person_movies = [
             PersonMovie(**movie_data["_source"])
@@ -52,7 +54,9 @@ class PersonService:
         if not person:
             return None
         person_movie_ids = [movie.id for movie in person.related_movies]
-        person_movies = await self._get_person_movies_from_elastic(person_movie_ids)
+        person_movies = await self._get_person_movies_from_elastic(
+            person_movie_ids
+        )
         return person_movies
 
     async def search_persons(self, query: str) -> Optional[List[Person]]:
@@ -60,10 +64,12 @@ class PersonService:
         found_persons = await self._search_persons_from_elastic(query)
         return found_persons
 
-    async def _search_persons_from_elastic(self, query: str) -> Optional[List[Person]]:
+    async def _search_persons_from_elastic(
+            self, query: str) -> Optional[List[Person]]:
         """Search persons in ElasticSearch by specific query."""
         search_query = {"query": {"match": {"full_name": {"query": query}}}}
-        persons_data = await self.elastic.search(index="persons", body=search_query)
+        persons_data = await self.elastic.search(
+            index="persons", body=search_query)
         persons = [
             Person(**person_data["_source"])
             for person_data in persons_data["hits"]["hits"]

@@ -8,6 +8,9 @@ from src.core.logger import LOGGING
 logging_config.dictConfig(LOGGING)
 
 
+CACHE_EXPIRE_IN_SECONDS = 60 * 5
+
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = "movies"
 
