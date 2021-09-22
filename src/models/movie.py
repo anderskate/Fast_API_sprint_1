@@ -1,27 +1,19 @@
-from typing import List
-
-import orjson
-from pydantic import BaseModel
-
 from .genre import Genre
 from .person import Person
+from .base import Base
 
 
-class Movie(BaseModel):
+class Movie(Base):
     """Model to represent Movie objects."""
 
     id: str
     imdb_rating: float
     title: str
     description: str
-    genres: List[Genre]
-    actors: List[Person]
-    writers: List[Person]
-    directors: List[Person]
-
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson.dumps
+    genres: list[Genre]
+    actors: list[Person]
+    writers: list[Person]
+    directors: list[Person]
 
 
 FIELDS_FOR_SEARCH = ["title", "description", "actors_names", "writers_names"]
