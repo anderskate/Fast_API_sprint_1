@@ -42,7 +42,8 @@ class MovieService:
     async def _search_movie_in_elastic(self, page: int, size: int, query: str) -> list[Optional[Movie]]:
         """Search movies in ElasticSearch by specific query."""
         body = {"size": size, "from": (page - 1) * size}
-        res = await self.elastic.search(index="movies", body=body.update(get_search_body_for_movies(query)))
+        body.update(get_search_body_for_movies(query))
+        res = await self.elastic.search(index="movies", body=body)
         return parse_objects(res, Movie)
 
     async def _get_movie_from_elastic(self, movie_id: str) -> Optional[Movie]:
