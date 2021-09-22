@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
@@ -27,7 +27,7 @@ class PersonService:
         person_data = await self.elastic.get("persons", person_id)
         return Person(**person_data["_source"])
 
-    async def get_person_movies(self, page: int, size: int, person_id: str) -> Optional[List[Movie]]:
+    async def get_person_movies(self, page: int, size: int, person_id: str) -> Optional[list[Movie]]:
         """Get all person movies data."""
         person = await self._get_person_from_elastic(person_id)
         if not person:
@@ -35,17 +35,17 @@ class PersonService:
         person_movie_ids = [movie.id for movie in person.related_movies]
         return await self._get_person_movies_from_elastic(page, size, person_movie_ids)
 
-    async def _get_person_movies_from_elastic(self, page: int, size: int, movie_ids: List[str]) -> List[Movie]:
+    async def _get_person_movies_from_elastic(self, page: int, size: int, movie_ids: list[str]) -> list[Movie]:
         """Get all person movies data from ElasticSearch."""
         body = {"size": size, "from": (page - 1) * size, "query": {"ids": {"values": movie_ids}}}
         person_movies_data = await self.elastic.search(index="movies", body=body)
         return parse_objects(person_movies_data, Movie)
 
-    async def search_persons(self, page: int, size: int, query: str) -> List[Person]:
+    async def search_persons(self, page: int, size: int, query: str) -> list[Person]:
         """Find persons by specific query."""
         return await self._search_persons_from_elastic(page, size, query)
 
-    async def _search_persons_from_elastic(self, page: int, size: int, query: str) -> List[Person]:
+    async def _search_persons_from_elastic(self, page: int, size: int, query: str) -> list[Person]:
         """Search persons in ElasticSearch by specific query."""
         body = {"size": size, "from": (page - 1) * size, "query": {"match": {"full_name": {"query": query}}}}
         persons_data = await self.elastic.search(index="persons", body=body)
