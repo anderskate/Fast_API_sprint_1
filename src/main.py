@@ -1,9 +1,9 @@
+import aioredis
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-import aioredis
 
 from src.api.base_router import api_router
 from src.core.config import settings

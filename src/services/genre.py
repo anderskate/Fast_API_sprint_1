@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends

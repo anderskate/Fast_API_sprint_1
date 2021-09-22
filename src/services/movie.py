@@ -20,15 +20,13 @@ class MovieService:
         """Get movie data by id."""
         return await self._get_movie_from_elastic(movie_id)
 
-    async def get_all(self, sort: Optional[str], genres: Optional[str]):
+    async def get_all(self, page: int, size: int, sort: Optional[str], genres: Optional[str]):
         """Get all movies data with optional filters."""
-        return await self._get_movies_from_elastic(sort, genres)
+        return await self._get_movies_from_elastic(page, size, sort, genres)
 
-    async def _get_movies_from_elastic(
-        self, sort: Optional[str], genres: Optional[List[str]]
-    ):
+    async def _get_movies_from_elastic(self, page: int, size: int, sort: Optional[str], genres: Optional[List[str]]):
         """Get movies from ElasticSearch with optional filters."""
-        body = {}
+        body = {"size": size, "from": (page - 1) * size}
         if sort:
             body.update(get_movies_sorting_for_elastic(sort))
         if genres:
@@ -36,17 +34,15 @@ class MovieService:
         res = await self.elastic.search(index="movies", body=body)
         return parse_objects(res, Movie)
 
-    async def search_movies(self, query):
+    async def search_movies(self, page: int, size: int, query: str):
         """Find movies by specific query."""
-        movies = await self._search_movie_in_elastic(query)
+        movies = await self._search_movie_in_elastic(page, size, query)
         return movies
 
-    async def _search_movie_in_elastic(
-            self, query: str) -> List[Optional[Movie]]:
+    async def _search_movie_in_elastic(self, page: int, size: int, query: str) -> List[Optional[Movie]]:
         """Search movies in ElasticSearch by specific query."""
-        res = await self.elastic.search(
-            index="movies", body=get_search_body_for_movies(query)
-        )
+        body = {"size": size, "from": (page - 1) * size}
+        res = await self.elastic.search(index="movies", body=body.update(get_search_body_for_movies(query)))
         return parse_objects(res, Movie)
 
     async def _get_movie_from_elastic(self, movie_id: str) -> Optional[Movie]:
