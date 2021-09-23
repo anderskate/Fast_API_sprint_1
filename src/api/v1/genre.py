@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_cache.decorator import cache
@@ -24,11 +24,11 @@ async def get_genre_details(
     return genre
 
 
-@router.get("/", response_model=List[Genre])
+@router.get("/", response_model=list[Genre])
 @cache(expire=60 * 5)
 async def get_genres(
     genre_service: GenreService = Depends(get_genre_service),
-) -> Optional[List[Genre]]:
+) -> Optional[list[Genre]]:
     """Represent all genres."""
     genres = await genre_service.get_all()
     return genres

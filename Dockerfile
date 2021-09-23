@@ -1,4 +1,4 @@
-FROM python:3.8.10
+FROM python:3.9
 
 RUN mkdir -p /opt/app
 ADD ./requirements.txt /opt/app

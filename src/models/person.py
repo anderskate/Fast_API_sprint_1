@@ -1,25 +1,20 @@
 from datetime import date
-from typing import List, Optional
+from typing import Optional
 
-import orjson
-from pydantic import BaseModel
+from .base import Base
 
 
-class RelatedPersonMovie(BaseModel):
+class RelatedPersonMovie(Base):
     """Model to represent movie in which the person took part."""
 
     id: str
     role: str
 
 
-class Person(BaseModel):
+class Person(Base):
     """Model to represent Person objects."""
 
     id: str
     full_name: str
     birth_date: Optional[date]
-    related_movies: Optional[List[RelatedPersonMovie]]
-
-    class Config:
-        json_loads = orjson.loads
-        json_dumps = orjson.dumps
+    related_movies: Optional[list[RelatedPersonMovie]]

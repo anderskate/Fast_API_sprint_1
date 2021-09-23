@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional
 
 from elasticsearch import AsyncElasticsearch
 from fastapi import Depends
@@ -24,12 +24,12 @@ class GenreService:
         genre_data = await self.elastic.get('genres', genre_id)
         return Genre(**genre_data['_source'])
 
-    async def get_all(self) -> Optional[List[Genre]]:
+    async def get_all(self) -> Optional[list[Genre]]:
         """Get all Genres data."""
         genres = await self._get_genres_from_elastic()
         return genres
 
-    async def _get_genres_from_elastic(self) -> Optional[List[Genre]]:
+    async def _get_genres_from_elastic(self) -> Optional[list[Genre]]:
         """Get all Genres data from ElasticSearch."""
         genres_data = await self.elastic.search(index='genres')
         genres = [
