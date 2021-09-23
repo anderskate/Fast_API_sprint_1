@@ -20,11 +20,17 @@ class MovieService:
         """Get movie data by id."""
         return await self._get_movie_from_elastic(movie_id)
 
-    async def get_all(self, page: int, size: int, sort: Optional[str], genres: Optional[str]):
+    async def get_all(
+            self, page: int, size: int,
+            sort: Optional[str], genres: Optional[str]
+    ):
         """Get all movies data with optional filters."""
         return await self._get_movies_from_elastic(page, size, sort, genres)
 
-    async def _get_movies_from_elastic(self, page: int, size: int, sort: Optional[str], genres: Optional[list[str]]):
+    async def _get_movies_from_elastic(
+            self, page: int, size: int,
+            sort: Optional[str], genres: Optional[list[str]]
+    ):
         """Get movies from ElasticSearch with optional filters."""
         body = {"size": size, "from": (page - 1) * size}
         if sort:
@@ -39,7 +45,9 @@ class MovieService:
         movies = await self._search_movie_in_elastic(page, size, query)
         return movies
 
-    async def _search_movie_in_elastic(self, page: int, size: int, query: str) -> list[Optional[Movie]]:
+    async def _search_movie_in_elastic(
+            self, page: int, size: int, query: str
+    ) -> list[Optional[Movie]]:
         """Search movies in ElasticSearch by specific query."""
         body = {"size": size, "from": (page - 1) * size}
         body.update(get_search_body_for_movies(query))
