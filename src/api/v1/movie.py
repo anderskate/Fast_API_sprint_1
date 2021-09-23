@@ -10,18 +10,6 @@ from src.services.movie import MovieService, get_movie_service
 router = APIRouter()
 
 
-@router.get("/search/", response_model=list[Movie])
-@cache(expire=60 * 5)
-async def search_movies(
-        query: str,
-        page: int = Query(1, ge=1),
-        size: int = Query(100, ge=1, le=500),
-        movie_service: MovieService = Depends(get_movie_service)
-) -> list[Movie]:
-    """Represent movies founded by specific query."""
-    return await movie_service.search_movies(page, size, query)
-
-
 @router.get("/{movie_id}", response_model=Movie)
 @cache(expire=60 * 5)
 async def get_movie_details(
@@ -39,6 +27,7 @@ async def get_movie_details(
 @router.get("", response_model=list[Movie])
 @cache(expire=60 * 5)
 async def get_movies(
+        search: Optional[str] = Query(None),
         page: int = Query(1, ge=1),
         size: int = Query(100, ge=1, le=500),
         sort: Optional[str] = Query("imdb_rating", regex="-?imdb_rating$"),
@@ -46,4 +35,6 @@ async def get_movies(
         movie_service: MovieService = Depends(get_movie_service),
 ) -> list[Movie]:
     """Represent all movies with optional filters."""
+    if search:
+        return await movie_service.search_movies(page, size, search)
     return await movie_service.get_all(page, size, sort, genres)
