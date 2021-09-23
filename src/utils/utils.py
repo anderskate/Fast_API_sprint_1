@@ -9,7 +9,9 @@ from src.models.movie import FIELDS_FOR_SEARCH, Movie, Person
 def get_movies_sorting_for_elastic(sort_field: str) -> dict:
     return {
         "sort": {
-            "imdb_rating": {"order": "asc" if sort_field == "imdb_rating" else "desc"}
+            "imdb_rating": {
+                "order": "asc" if sort_field == "imdb_rating" else "desc"
+            }
         }
     }
 
@@ -17,7 +19,9 @@ def get_movies_sorting_for_elastic(sort_field: str) -> dict:
 def get_genres_filter_for_elastic(genres: list[str]) -> dict:
     should = [{"match": {"genres.id": genre} for genre in genres}]
     return {
-        "query": {"nested": {"path": "genres", "query": {"bool": {"should": should}}}}
+        "query": {
+            "nested": {"path": "genres", "query": {"bool": {"should": should}}}
+        }
     }
 
 
@@ -26,12 +30,15 @@ def get_search_body_for_movies(
 ) -> dict:
     if fields_for_search is None:
         fields_for_search = FIELDS_FOR_SEARCH
-    return {"query": {"multi_match": {"query": query, "fields": fields_for_search}}}
+    return {
+        "query": {"multi_match": {"query": query, "fields": fields_for_search}}
+    }
 
 
 def parse_objects(doc: dict, schema: Type[Union[Movie, Person]]) -> list:
     if doc and doc.get("hits"):
         return parse_obj_as(
-            list[schema], list(map(itemgetter("_source"), doc["hits"].get("hits", [])))
+            list[schema],
+            list(map(itemgetter("_source"), doc["hits"].get("hits", [])))
         )
     return []

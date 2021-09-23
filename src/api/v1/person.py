@@ -19,7 +19,9 @@ async def get_person_movies(
         person_service: PersonService = Depends(get_person_service)
 ) -> list[Movie]:
     """Represent all person movies."""
-    person_movies = await person_service.get_person_movies(page, size, person_id)
+    person_movies = await person_service.get_person_movies(
+        page, size, person_id
+    )
     if person_movies is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND, detail="person not found"
@@ -27,22 +29,12 @@ async def get_person_movies(
     return person_movies
 
 
-@router.get("/search/", response_model=list[Person])
-@cache(expire=60 * 5)
-async def search_persons(
-        query: str,
-        page: int = Query(1, ge=1),
-        size: int = Query(100, ge=1, le=500),
-        person_service: PersonService = Depends(get_person_service)
-) -> list[Person]:
-    """Represent persons founded by specific query."""
-    return await person_service.search_persons(page, size, query)
-
-
 @router.get("/{person_id}", response_model=Person)
 @cache(expire=60 * 5)
 async def get_person_details(
-        person_id: str, person_service: PersonService = Depends(get_person_service)
+        person_id: str, person_service: PersonService = Depends(
+            get_person_service
+        )
 ) -> Person:
     """Represent Person details."""
     person = await person_service.get_by_id(person_id)
@@ -52,3 +44,15 @@ async def get_person_details(
             status_code=HTTPStatus.NOT_FOUND, detail="person not found"
         )
     return person
+
+
+@router.get("/", response_model=list[Person])
+@cache(expire=60 * 5)
+async def get_persons(
+        search: str,
+        page: int = Query(1, ge=1),
+        size: int = Query(100, ge=1, le=500),
+        person_service: PersonService = Depends(get_person_service)
+) -> list[Person]:
+    """Represent persons founded by specific search query."""
+    return await person_service.search_persons(page, size, search)
